@@ -1,0 +1,24 @@
+//Events
+const EventEmitter= require('events')
+const { createServer } = require('http')
+const customeEmitter=new EventEmitter()
+
+customeEmitter.on('response',(name,id)=>{
+    console.log(`data received ${name} with id ${id}`)
+})
+customeEmitter.on('response',()=>{
+    console.log('some other logic here')
+})
+
+
+const server=createServer((req,res)=>
+{
+        customeEmitter.emit('response', 'Satish', 28);
+            res.end('Server Running');
+
+})
+
+server.listen(3000,()=>
+{
+    console.log('Server running at http://localhost:3000')
+})

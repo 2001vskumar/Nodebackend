@@ -1,0 +1,288 @@
+// ==========================================================
+// FILE SYSTEM (FS) - ALL APPROACHES
+// ==========================================================
+//
+// 1. Callback Pattern (Old Way)
+// 2. Promises using new Promise()
+// 3. util.promisify()
+// 4. fs.promises (Modern & Recommended)
+//
+// ==========================================================
+
+
+// ==========================================================
+// 1. CALLBACK APPROACH (Old Way)
+// ==========================================================
+
+// const { readFile, writeFile } = require('fs');
+
+// readFile('./content/first.txt', 'utf8', (err, result) => {
+//     if (err) {
+//         console.log(err);
+//         return;
+//     }
+
+//     console.log(result);
+// });
+
+/*
+Flow
+
+readFile()
+      │
+      ▼
+Reading file...
+      │
+      ▼
+Callback invoked
+      │
+      ▼
+result available
+
+✔ Uses callbacks
+✔ Asynchronous
+❌ Callback Hell when nesting increases
+*/
+
+
+// ==========================================================
+// 2. CREATING OUR OWN PROMISE
+// ==========================================================
+
+// const { readFile } = require('fs');
+
+// const getPath = (path) => {
+//     return new Promise((resolve, reject) => {
+
+//         readFile(path, 'utf8', (err, result) => {
+
+//             if (err) {
+//                 reject(err);
+//             } else {
+//                 resolve(result);
+//             }
+
+//         });
+
+//     });
+// };
+
+// getPath('./content/first.txt')
+//     .then((result) => {
+//         console.log(result);
+//     })
+//     .catch((err) => {
+//         console.log(err);
+//     });
+
+/*
+Promise States
+
+Pending
+   │
+   ├──────────────┐
+   ▼              ▼
+Resolved       Rejected
+   │              │
+then()        catch()
+
+✔ Better than callbacks
+✔ Avoids callback hell
+*/
+
+
+// ==========================================================
+// 3. util.promisify()
+// Converts callback functions into Promise functions
+// ==========================================================
+
+// const { readFile, writeFile } = require('fs');
+// const util = require('util');
+
+// const readFilePromise = util.promisify(readFile);
+// const writeFilePromise = util.promisify(writeFile);
+
+// const start = async () => {
+
+//     try {
+
+//         const first = await readFilePromise('./content/first.txt', 'utf8');
+
+//         await writeFilePromise(
+//             './content/result.txt',
+//             `This is awesome: ${first}`
+//         );
+
+//         console.log(first);
+
+//     } catch (err) {
+
+//         console.log(err);
+
+//     }
+
+// };
+
+// start();
+
+/*
+readFile()
+        │
+promisify()
+        │
+        ▼
+Promise
+        │
+        ▼
+await
+        │
+        ▼
+Result
+
+✔ Useful for old callback APIs
+*/
+
+
+// ==========================================================
+// 4. fs.promises (Modern Way)
+// ==========================================================
+
+const { readFile, writeFile } = require('fs').promises;
+
+const start = async () => {
+
+    try {
+
+        // Read file
+        const first = await readFile('./content/first.txt', 'utf8');
+
+        // Write file
+        await writeFile(
+            './content/result-mind-grenade.txt',
+            `This is awesome: ${first}`
+        );
+
+        console.log(first);
+
+    }
+    catch (error) {
+
+        console.log(error);
+
+    }
+
+};
+
+function normal() {
+    console.log("hello");
+}
+
+start();
+normal();
+
+/*
+Expected Output
+
+hello
+this is from first txt file
+
+Why?
+
+start()
+      │
+      ▼
+readFile()
+      │
+Promise Pending
+      │
+await pauses ONLY start()
+      │
+Node.js continues
+      │
+normal()
+      │
+hello
+      │
+Promise Resolved
+      │
+start() resumes
+      │
+Print file contents
+
+✔ Cleanest approach
+✔ Uses async/await
+✔ Recommended in modern Node.js
+*/
+
+
+// ==========================================================
+// REVISION NOTES
+// ==========================================================
+
+/*
+
+CALLBACK
+--------
+readFile(path, callback)
+
+✔ Async
+✔ Callback function
+
+--------------------------------------------
+
+CUSTOM PROMISE
+--------------
+return new Promise((resolve, reject)=>{})
+
+✔ We manually convert callback into Promise.
+
+--------------------------------------------
+
+UTIL.PROMISIFY
+--------------
+util.promisify(readFile)
+
+✔ Converts callback API to Promise API.
+
+--------------------------------------------
+
+FS.PROMISES
+-----------
+const { readFile } = require('fs').promises
+
+✔ Already Promise-based.
+✔ No need for util.promisify().
+
+--------------------------------------------
+
+THEN() vs AWAIT
+
+.then()
+
+getPath(...)
+   .then(...)
+   .catch(...)
+
+await
+
+const data = await getPath(...)
+
+Both work with Promises.
+
+await is just cleaner syntax.
+
+--------------------------------------------
+
+Remember
+
+readFile()           -> Callback
+readFilePromise()    -> Promise
+fs.promises.readFile -> Promise
+
+await works ONLY with Promises.
+
+await pauses ONLY the async function.
+
+It DOES NOT block the Node.js Event Loop.
+
+*/

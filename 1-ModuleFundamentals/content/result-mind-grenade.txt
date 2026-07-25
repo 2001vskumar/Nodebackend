@@ -1,0 +1,1 @@
+this is awesome: 'this is from first txt file
